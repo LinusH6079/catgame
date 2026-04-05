@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chaos Cat</title>
+    <meta
+      name="description"
+      content="Cause maximum household chaos as a gremlin cat in a fast, free browser game."
+    />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.178.0/build/three.module.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <canvas id="game"></canvas>
+
+      <section class="screen screen--start" id="start-screen">
+        <div class="screen__panel">
+          <p class="eyebrow">2026 Vibe Coding Game Jam</p>
+          <h1>Chaos Cat</h1>
+          <p class="lede">
+            Be a tiny household menace and knock everything valuable onto the
+            floor before your human stops you.
+          </p>
+
+          <div class="controls-grid">
+            <div><span>WASD</span> Move</div>
+            <div><span>Space</span> Jump</div>
+            <div><span>Shift</span> Dash</div>
+            <div><span>E / Click</span> Paw Swipe</div>
+          </div>
+
+          <button id="start-button" class="button button--primary">
+            Start The Chaos
+          </button>
+        </div>
+      </section>
+
+      <section class="hud hidden" id="hud">
+        <div class="hud__cluster">
+          <div class="hud__stat">
+            <span class="hud__label">Score</span>
+            <strong id="score-value">0</strong>
+          </div>
+          <div class="hud__stat">
+            <span class="hud__label">Time</span>
+            <strong id="timer-value">90.0</strong>
+          </div>
+        </div>
+
+        <div class="hud__center">
+          <div class="combo-meter" id="combo-meter">
+            <div class="combo-meter__bar" id="combo-bar"></div>
+          </div>
+          <strong class="combo-text" id="combo-text">Calm for now</strong>
+        </div>
+
+        <div class="owner-bubble" id="owner-text">"Miso..."</div>
+      </section>
+
+      <section class="toast-layer" id="toast-layer"></section>
+
+      <section class="screen screen--end hidden" id="end-screen">
+        <div class="screen__panel screen__panel--compact">
+          <p class="eyebrow">Round Over</p>
+          <h2 id="end-rank">Indoor Menace</h2>
+          <p class="final-score" id="end-score">0 points</p>
+          <p class="best-score" id="best-score">Best: 0</p>
+          <button id="restart-button" class="button button--primary">
+            Restart Rampage
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
