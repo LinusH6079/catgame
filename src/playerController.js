@@ -49,13 +49,13 @@ export class PlayerController {
     const leg = new THREE.Group();
     leg.position.set(x, 0.26, z);
 
-    const upper = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, 0.22, 4, 8), material);
+    const upper = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, 0.22, 6, 12), material);
     upper.castShadow = true;
     upper.position.y = 0.18;
     leg.add(upper);
 
     const paw = new THREE.Mesh(
-      new THREE.SphereGeometry(0.09, 12, 12),
+      new THREE.SphereGeometry(0.09, 18, 16),
       new THREE.MeshStandardMaterial({ color: 0xffd1aa, roughness: 0.94 }),
     );
     paw.position.y = 0.01;
@@ -79,19 +79,19 @@ export class PlayerController {
       roughness: 0.35,
     });
 
-    const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.32, 0.92, 8, 14), fur);
+    const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.32, 0.92, 10, 22), fur);
     torso.rotation.x = Math.PI / 2;
     torso.position.set(0, 0.56, 0.02);
     torso.castShadow = true;
     cat.add(torso);
 
-    const chest = new THREE.Mesh(new THREE.SphereGeometry(0.25, 14, 14), accent);
+    const chest = new THREE.Mesh(new THREE.SphereGeometry(0.25, 24, 20), accent);
     chest.scale.set(1.1, 1.1, 0.75);
     chest.position.set(0, 0.48, 0.36);
     chest.castShadow = true;
     cat.add(chest);
 
-    const hips = new THREE.Mesh(new THREE.SphereGeometry(0.27, 14, 14), fur);
+    const hips = new THREE.Mesh(new THREE.SphereGeometry(0.27, 24, 20), fur);
     hips.scale.set(1.1, 0.95, 0.9);
     hips.position.set(0, 0.52, -0.38);
     hips.castShadow = true;
@@ -101,23 +101,23 @@ export class PlayerController {
     headAnchor.position.set(0, 0.78, 0.74);
     cat.add(headAnchor);
 
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.34, 20, 20), fur);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.34, 32, 28), fur);
     head.scale.set(1, 0.9, 1.02);
     head.castShadow = true;
     headAnchor.add(head);
 
-    const muzzle = new THREE.Mesh(new THREE.SphereGeometry(0.17, 14, 14), accent);
+    const muzzle = new THREE.Mesh(new THREE.SphereGeometry(0.17, 22, 18), accent);
     muzzle.position.set(0, -0.06, 0.23);
     muzzle.scale.set(1.2, 0.8, 1.15);
     muzzle.castShadow = true;
     headAnchor.add(muzzle);
 
-    const nose = new THREE.Mesh(new THREE.SphereGeometry(0.04, 10, 10), noseMaterial);
+    const nose = new THREE.Mesh(new THREE.SphereGeometry(0.04, 18, 14), noseMaterial);
     nose.position.set(0, -0.02, 0.38);
     nose.scale.set(1.2, 0.75, 1);
     headAnchor.add(nose);
 
-    const eyeLeft = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 10), eyeMaterial);
+    const eyeLeft = new THREE.Mesh(new THREE.SphereGeometry(0.05, 18, 14), eyeMaterial);
     eyeLeft.position.set(0.12, 0.04, 0.28);
     headAnchor.add(eyeLeft);
 
@@ -125,7 +125,7 @@ export class PlayerController {
     eyeRight.position.x = -0.12;
     headAnchor.add(eyeRight);
 
-    const earGeometry = new THREE.ConeGeometry(0.12, 0.24, 4);
+    const earGeometry = new THREE.ConeGeometry(0.12, 0.24, 6, 2);
     const earLeft = new THREE.Mesh(earGeometry, fur);
     earLeft.position.set(0.18, 0.27, 0.02);
     earLeft.rotation.z = -0.34;
@@ -157,13 +157,13 @@ export class PlayerController {
 
     const tailRoot = new THREE.Group();
     tailRoot.position.set(0, 0.76, -0.74);
-    const tailBase = new THREE.Mesh(new THREE.CapsuleGeometry(0.08, 0.42, 4, 10), fur);
+    const tailBase = new THREE.Mesh(new THREE.CapsuleGeometry(0.08, 0.42, 6, 16), fur);
     tailBase.rotation.x = Math.PI / 2;
     tailBase.position.set(0, 0.12, -0.26);
     tailBase.castShadow = true;
     tailRoot.add(tailBase);
 
-    const tailTip = new THREE.Mesh(new THREE.CapsuleGeometry(0.055, 0.32, 4, 10), accent);
+    const tailTip = new THREE.Mesh(new THREE.CapsuleGeometry(0.055, 0.32, 6, 16), accent);
     tailTip.rotation.x = Math.PI / 2;
     tailTip.position.set(0, 0.26, -0.56);
     tailTip.castShadow = true;
@@ -183,10 +183,10 @@ export class PlayerController {
   #bindInput() {
     const setKey = (event, value) => {
       const key = event.code;
-      if (key === "KeyW") this.keys.forward = value;
-      if (key === "KeyS") this.keys.backward = value;
-      if (key === "KeyA") this.keys.left = value;
-      if (key === "KeyD") this.keys.right = value;
+      if (key === "KeyW" || key === "ArrowUp") this.keys.forward = value;
+      if (key === "KeyS" || key === "ArrowDown") this.keys.backward = value;
+      if (key === "KeyA" || key === "ArrowLeft") this.keys.left = value;
+      if (key === "KeyD" || key === "ArrowRight") this.keys.right = value;
       if (key === "ShiftLeft" || key === "ShiftRight") this.keys.dash = value;
       if (key === "Space") this.keys.jump = value;
       if (key === "KeyE") this.keys.swipe = value;
@@ -194,8 +194,16 @@ export class PlayerController {
 
     window.addEventListener("keydown", (event) => {
       setKey(event, true);
-      if (event.code === "Space") {
+      if (
+        event.code === "Space" ||
+        event.code === "ArrowUp" ||
+        event.code === "ArrowDown" ||
+        event.code === "ArrowLeft" ||
+        event.code === "ArrowRight"
+      ) {
         event.preventDefault();
+      }
+      if (event.code === "Space") {
         this.jumpBuffer = 0.18;
       }
       if (event.code === "KeyE") {

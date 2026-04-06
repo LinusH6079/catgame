@@ -130,7 +130,7 @@ export function createSceneWorld(canvas) {
   room.add(floor);
 
   const rug = new THREE.Mesh(
-    new THREE.CircleGeometry(4.4, 48),
+    new THREE.CircleGeometry(4.4, 96),
     new THREE.MeshStandardMaterial({ color: 0xffd36a, roughness: 1 }),
   );
   rug.rotation.x = -Math.PI / 2;
@@ -362,7 +362,7 @@ export function createSceneWorld(canvas) {
   });
 
   const standingLampPole = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.09, 0.09, 2.6, 14),
+    new THREE.CylinderGeometry(0.09, 0.09, 2.6, 24),
     new THREE.MeshStandardMaterial({ color: 0x9b8a5b, roughness: 0.9 }),
   );
   standingLampPole.position.set(-13.8, 1.3, 4.8);
@@ -370,7 +370,7 @@ export function createSceneWorld(canvas) {
   room.add(standingLampPole);
 
   const lampShade = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.5, 0.7, 0.8, 18),
+    new THREE.CylinderGeometry(0.5, 0.7, 0.8, 32),
     new THREE.MeshStandardMaterial({ color: 0xfff7cf, roughness: 1 }),
   );
   lampShade.position.set(-13.8, 2.9, 4.8);
@@ -382,7 +382,7 @@ export function createSceneWorld(canvas) {
   room.add(bigTv);
 
   const bowl = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.38, 0.5, 0.18, 20),
+    new THREE.CylinderGeometry(0.38, 0.5, 0.18, 32),
     new THREE.MeshStandardMaterial({ color: 0x63c7ff, roughness: 0.95 }),
   );
   bowl.position.set(-4.8, 0.09, 7.4);

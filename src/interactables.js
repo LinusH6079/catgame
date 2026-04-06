@@ -26,8 +26,8 @@ function normalizeMeshToFloor(mesh) {
 
 function makeCup(def) {
   const group = new THREE.Group();
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.12, 0.26, 16), standardMaterial(def.color));
-  const handle = new THREE.Mesh(new THREE.TorusGeometry(0.08, 0.025, 8, 16), standardMaterial(0xffb188));
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.12, 0.26, 28), standardMaterial(def.color));
+  const handle = new THREE.Mesh(new THREE.TorusGeometry(0.08, 0.025, 12, 24), standardMaterial(0xffb188));
   handle.position.set(0.13, 0.14, 0);
   handle.rotation.y = Math.PI / 2;
   body.position.y = 0.13;
@@ -36,7 +36,7 @@ function makeCup(def) {
 }
 
 function makePlate(def) {
-  const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.26, 0.05, 20), standardMaterial(def.color));
+  const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.26, 0.05, 32), standardMaterial(def.color));
   plate.position.y = 0.025;
   return plate;
 }
@@ -57,9 +57,9 @@ function makeBooks() {
 
 function makePlant(def) {
   const group = new THREE.Group();
-  const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.21, 0.24, 14), standardMaterial(0xb16c42));
+  const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.21, 0.24, 24), standardMaterial(0xb16c42));
   pot.position.y = 0.12;
-  const leaves = new THREE.Mesh(new THREE.OctahedronGeometry(0.2, 1), standardMaterial(def.color));
+  const leaves = new THREE.Mesh(new THREE.IcosahedronGeometry(0.2, 1), standardMaterial(def.color));
   leaves.position.y = 0.46;
   group.add(pot, leaves);
   return group;
@@ -67,18 +67,18 @@ function makePlant(def) {
 
 function makeLamp(def) {
   const group = new THREE.Group();
-  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 0.12, 14), standardMaterial(0x9b8a5b));
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 0.12, 24), standardMaterial(0x9b8a5b));
   base.position.y = 0.06;
-  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.38, 12), standardMaterial(0x9b8a5b));
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.38, 20), standardMaterial(0x9b8a5b));
   stem.position.y = 0.31;
-  const shade = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.26, 0.22, 18), standardMaterial(def.color));
+  const shade = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.26, 0.22, 28), standardMaterial(def.color));
   shade.position.y = 0.59;
   group.add(base, stem, shade);
   return group;
 }
 
 function makeVase(def) {
-  const vase = new THREE.Mesh(new THREE.SphereGeometry(0.2, 14, 12), standardMaterial(def.color));
+  const vase = new THREE.Mesh(new THREE.SphereGeometry(0.2, 26, 22), standardMaterial(def.color));
   vase.scale.set(0.9, 1.3, 0.9);
   vase.position.y = 0.26;
   return vase;

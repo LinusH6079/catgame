@@ -6,7 +6,7 @@ Chaos Cat is a lightweight Three.js browser game built as a static site for the 
 
 - Open `index.html` in a browser, or serve the folder with any static host.
 - Controls:
-  - `WASD` move
+  - `WASD` or arrow keys move
   - `Space` jump
   - `Shift` dash
   - `E` or click paw swipe
