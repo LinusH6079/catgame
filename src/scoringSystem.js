@@ -52,6 +52,14 @@ export class ScoringSystem {
     return this.comboTimer / COMBO_WINDOW;
   }
 
+  penalize(points) {
+    this.score = Math.max(0, this.score - points);
+    this.comboCount = 0;
+    this.comboTimer = 0;
+    this.lastComboLabel = "Combo broken";
+    return this.score;
+  }
+
   saveBestIfNeeded() {
     if (this.score > this.bestScore) {
       this.bestScore = this.score;

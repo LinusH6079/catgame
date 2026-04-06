@@ -13,10 +13,22 @@ function createRoundedBox(width, height, depth, color) {
   return mesh;
 }
 
+function addWall(room, width, height, x, y, z, rotationY = 0) {
+  const wall = new THREE.Mesh(
+    new THREE.PlaneGeometry(width, height),
+    new THREE.MeshStandardMaterial({ color: WALL_COLOR, roughness: 0.98 }),
+  );
+  wall.position.set(x, y, z);
+  wall.rotation.y = rotationY;
+  room.add(wall);
+}
+
 function createSupport(
   group,
   supports,
-  { name, width, height, depth, x, y, z, color, topThickness = 0.16, legHeight = height, legInset = 0.14 },
+  staticColliders,
+  walkableSurfaces,
+  { name, width, height, depth, x, y, z, color, topThickness = 0.16, legHeight = height, legInset = 0.2 },
 ) {
   const body = new THREE.Group();
   const top = createRoundedBox(width, topThickness, depth, color);
@@ -43,13 +55,31 @@ function createSupport(
   body.position.set(x, y, z);
   group.add(body);
 
-  supports.push({
+  const support = {
     name,
     xMin: x - width / 2,
     xMax: x + width / 2,
     zMin: z - depth / 2,
     zMax: z + depth / 2,
     topY: y + legHeight + topThickness / 2,
+  };
+
+  supports.push(support);
+  staticColliders.push({
+    name,
+    minX: support.xMin,
+    maxX: support.xMax,
+    minZ: support.zMin,
+    maxZ: support.zMax,
+    topY: support.topY,
+  });
+  walkableSurfaces.push({
+    name,
+    xMin: support.xMin,
+    xMax: support.xMax,
+    zMin: support.zMin,
+    zMax: support.zMax,
+    y: support.topY,
   });
 }
 
@@ -66,29 +96,33 @@ export function createSceneWorld(canvas) {
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0xffedc9);
-  scene.fog = new THREE.Fog(0xffedc9, 16, 34);
+  scene.fog = new THREE.Fog(0xffedc9, 30, 62);
 
-  const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 100);
-  camera.position.set(0, 5, 8);
+  const camera = new THREE.PerspectiveCamera(56, window.innerWidth / window.innerHeight, 0.1, 140);
+  camera.position.set(0, 7, 12);
 
-  const ambient = new THREE.HemisphereLight(0xfff7ef, 0xb46c43, 1.3);
+  const ambient = new THREE.HemisphereLight(0xfff7ef, 0xb46c43, 1.35);
   scene.add(ambient);
 
-  const sun = new THREE.DirectionalLight(0xfff1cf, 1.8);
-  sun.position.set(4, 9, 3);
+  const sun = new THREE.DirectionalLight(0xfff1cf, 1.85);
+  sun.position.set(8, 18, 5);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(1024, 1024);
-  sun.shadow.camera.left = -10;
-  sun.shadow.camera.right = 10;
-  sun.shadow.camera.top = 10;
-  sun.shadow.camera.bottom = -10;
+  sun.shadow.mapSize.set(1536, 1536);
+  sun.shadow.camera.left = -22;
+  sun.shadow.camera.right = 22;
+  sun.shadow.camera.top = 22;
+  sun.shadow.camera.bottom = -22;
   scene.add(sun);
 
   const room = new THREE.Group();
   scene.add(room);
+  const staticColliders = [];
+  const walkableSurfaces = [
+    { name: "floor", xMin: -18, xMax: 18, zMin: -18, zMax: 18, y: 0 },
+  ];
 
   const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(18, 18),
+    new THREE.PlaneGeometry(36, 36),
     new THREE.MeshStandardMaterial({ color: FLOOR_COLOR, roughness: 0.95 }),
   );
   floor.rotation.x = -Math.PI / 2;
@@ -96,136 +130,271 @@ export function createSceneWorld(canvas) {
   room.add(floor);
 
   const rug = new THREE.Mesh(
-    new THREE.CircleGeometry(2.2, 32),
+    new THREE.CircleGeometry(4.4, 48),
     new THREE.MeshStandardMaterial({ color: 0xffd36a, roughness: 1 }),
   );
   rug.rotation.x = -Math.PI / 2;
-  rug.position.set(-0.5, 0.02, 0.8);
+  rug.position.set(-1.8, 0.02, 1.7);
   room.add(rug);
 
-  const wallMaterial = new THREE.MeshStandardMaterial({ color: WALL_COLOR, roughness: 0.98 });
-  const backWall = new THREE.Mesh(new THREE.PlaneGeometry(18, 8), wallMaterial);
-  backWall.position.set(0, 4, -9);
-  room.add(backWall);
+  addWall(room, 36, 10, 0, 5, -18);
+  addWall(room, 36, 10, -18, 5, 0, Math.PI / 2);
+  addWall(room, 12, 10, 18, 5, -12, -Math.PI / 2);
+  addWall(room, 12, 10, 18, 5, 8, -Math.PI / 2);
+  addWall(room, 3.4, 2.2, 18, 8.9, -2, -Math.PI / 2);
 
-  const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(18, 8), wallMaterial);
-  leftWall.rotation.y = Math.PI / 2;
-  leftWall.position.set(-9, 4, 0);
-  room.add(leftWall);
-
-  const windowFrame = createRoundedBox(4.6, 2.6, 0.2, 0xffffff);
-  windowFrame.position.set(-2.1, 4.8, -8.86);
+  const windowFrame = createRoundedBox(7.8, 3.2, 0.2, 0xffffff);
+  windowFrame.position.set(-5.4, 5.8, -17.86);
   room.add(windowFrame);
 
-  const skyPane = createRoundedBox(4.2, 2.2, 0.06, 0x8fd8ff);
-  skyPane.position.set(-2.1, 4.8, -8.74);
+  const skyPane = createRoundedBox(7.3, 2.7, 0.06, 0x8fd8ff);
+  skyPane.position.set(-5.4, 5.8, -17.74);
   room.add(skyPane);
 
-  const counter = createRoundedBox(4.6, 1.2, 1.2, 0xf3c48e);
-  counter.position.set(4.7, 0.6, -6.4);
+  const doorFrame = createRoundedBox(0.25, 4.6, 3.2, 0xf7c58d);
+  doorFrame.position.set(17.82, 2.3, -2);
+  room.add(doorFrame);
+
+  const ownerDoor = new THREE.Group();
+  const door = createRoundedBox(1.6, 3.5, 0.16, 0xffab5f);
+  door.position.set(0, 1.75, 0);
+  ownerDoor.add(door);
+  ownerDoor.position.set(17.78, 0, -2);
+  ownerDoor.rotation.y = -Math.PI / 2;
+  room.add(ownerDoor);
+
+  const counter = createRoundedBox(8.6, 1.2, 1.4, 0xf3c48e);
+  counter.position.set(11.6, 0.6, -13.8);
   room.add(counter);
 
-  const cabinets = createRoundedBox(4.9, 1.4, 0.9, 0xff8d4b);
-  cabinets.position.set(4.7, 2.5, -7.2);
+  const cabinets = createRoundedBox(9.2, 1.5, 0.9, 0xff8d4b);
+  cabinets.position.set(11.6, 2.7, -14.8);
   room.add(cabinets);
 
+  const island = createRoundedBox(4.5, 1.1, 1.8, 0xf7c38f);
+  island.position.set(8.2, 0.55, -4.2);
+  room.add(island);
+
   const supports = [];
-  createSupport(room, supports, {
+  createSupport(room, supports, staticColliders, walkableSurfaces, {
     name: "coffee-table",
-    width: 2.8,
+    width: 4.8,
     height: 1.2,
-    depth: 1.3,
-    x: -1.2,
+    depth: 2.3,
+    x: -2.4,
     y: 0,
-    z: 0.7,
+    z: 2.2,
     color: 0x7d4a2c,
   });
 
-  createSupport(room, supports, {
+  createSupport(room, supports, staticColliders, walkableSurfaces, {
     name: "bookshelf",
-    width: 2.5,
-    height: 2.8,
-    depth: 0.8,
-    x: -6.3,
+    width: 3.8,
+    height: 3,
+    depth: 1.1,
+    x: -14.1,
     y: 0,
-    z: -5.8,
+    z: -11.4,
     color: 0x8d5934,
     topThickness: 0.12,
-    legInset: 0.22,
+    legInset: 0.26,
   });
 
-  createSupport(room, supports, {
+  createSupport(room, supports, staticColliders, walkableSurfaces, {
     name: "tv-stand",
-    width: 2.8,
-    height: 1.1,
-    depth: 1,
-    x: 2.1,
+    width: 4.6,
+    height: 1.15,
+    depth: 1.4,
+    x: 2.8,
     y: 0,
-    z: 4.9,
+    z: 10.8,
     color: 0x6d4329,
   });
 
-  createSupport(room, supports, {
+  createSupport(room, supports, staticColliders, walkableSurfaces, {
     name: "side-table",
-    width: 1,
+    width: 1.4,
     height: 1.05,
-    depth: 1,
-    x: -5.5,
+    depth: 1.4,
+    x: -12.4,
     y: 0,
-    z: 2.6,
+    z: 5.2,
     color: 0x8d5934,
+  });
+
+  createSupport(room, supports, staticColliders, walkableSurfaces, {
+    name: "dining-table",
+    width: 4.8,
+    height: 1.18,
+    depth: 2.3,
+    x: 9.2,
+    y: 0,
+    z: 6.4,
+    color: 0x7a4a2b,
+  });
+
+  createSupport(room, supports, staticColliders, walkableSurfaces, {
+    name: "console-table",
+    width: 3.8,
+    height: 1.08,
+    depth: 1.2,
+    x: 13.4,
+    y: 0,
+    z: 11.8,
+    color: 0x8a5330,
+  });
+
+  createSupport(room, supports, staticColliders, walkableSurfaces, {
+    name: "wide-shelf",
+    width: 4.2,
+    height: 1.26,
+    depth: 1.1,
+    x: -12.4,
+    y: 0,
+    z: 12.8,
+    color: 0x896044,
   });
 
   supports.push({
     name: "kitchen-counter",
-    xMin: 2.5,
-    xMax: 6.9,
-    zMin: -7.0,
-    zMax: -5.8,
+    xMin: 7.3,
+    xMax: 15.9,
+    zMin: -14.5,
+    zMax: -13.1,
     topY: 1.2,
   });
+  staticColliders.push({
+    name: "kitchen-counter",
+    minX: 7.3,
+    maxX: 15.9,
+    minZ: -14.5,
+    maxZ: -13.1,
+    topY: 1.2,
+  });
+  walkableSurfaces.push({
+    name: "kitchen-counter",
+    xMin: 7.3,
+    xMax: 15.9,
+    zMin: -14.5,
+    zMax: -13.1,
+    y: 1.2,
+  });
 
-  const sofaBase = createRoundedBox(3.4, 0.9, 1.4, 0x89d6c2);
-  sofaBase.position.set(-4.6, 0.45, 5.7);
+  supports.push({
+    name: "kitchen-island",
+    xMin: 6,
+    xMax: 10.4,
+    zMin: -5.1,
+    zMax: -3.3,
+    topY: 1.1,
+  });
+  staticColliders.push({
+    name: "kitchen-island",
+    minX: 6,
+    maxX: 10.4,
+    minZ: -5.1,
+    maxZ: -3.3,
+    topY: 1.1,
+  });
+  walkableSurfaces.push({
+    name: "kitchen-island",
+    xMin: 6,
+    xMax: 10.4,
+    zMin: -5.1,
+    zMax: -3.3,
+    y: 1.1,
+  });
+
+  const sofaBase = createRoundedBox(5.8, 1, 2.1, 0x89d6c2);
+  sofaBase.position.set(-10.8, 0.5, 12.7);
   room.add(sofaBase);
+  staticColliders.push({
+    name: "sofa-seat",
+    minX: -13.7,
+    maxX: -7.9,
+    minZ: 11.65,
+    maxZ: 13.75,
+    topY: 1,
+  });
+  walkableSurfaces.push({
+    name: "sofa-seat",
+    xMin: -13.6,
+    xMax: -8,
+    zMin: 11.75,
+    zMax: 13.65,
+    y: 1,
+  });
 
-  const sofaBack = createRoundedBox(3.4, 1.2, 0.4, 0x79c4b2);
-  sofaBack.position.set(-4.6, 1.15, 6.3);
+  const sofaBack = createRoundedBox(5.8, 1.4, 0.5, 0x79c4b2);
+  sofaBack.position.set(-10.8, 1.25, 13.55);
   room.add(sofaBack);
+  staticColliders.push({
+    name: "sofa-back",
+    minX: -13.7,
+    maxX: -7.9,
+    minZ: 13.3,
+    maxZ: 13.8,
+    topY: 1.95,
+  });
 
-  const lampStand = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.08, 0.08, 2.2, 12),
+  const armLeft = createRoundedBox(0.55, 1.25, 2.1, 0x79c4b2);
+  armLeft.position.set(-13.45, 0.62, 12.7);
+  room.add(armLeft);
+  staticColliders.push({
+    name: "sofa-arm-left",
+    minX: -13.72,
+    maxX: -13.18,
+    minZ: 11.65,
+    maxZ: 13.75,
+    topY: 1.25,
+  });
+
+  const armRight = createRoundedBox(0.55, 1.25, 2.1, 0x79c4b2);
+  armRight.position.set(-8.15, 0.62, 12.7);
+  room.add(armRight);
+  staticColliders.push({
+    name: "sofa-arm-right",
+    minX: -8.42,
+    maxX: -7.88,
+    minZ: 11.65,
+    maxZ: 13.75,
+    topY: 1.25,
+  });
+
+  const standingLampPole = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.09, 0.09, 2.6, 14),
     new THREE.MeshStandardMaterial({ color: 0x9b8a5b, roughness: 0.9 }),
   );
-  lampStand.position.set(-6.1, 1.1, 2.4);
-  lampStand.castShadow = true;
-  room.add(lampStand);
+  standingLampPole.position.set(-13.8, 1.3, 4.8);
+  standingLampPole.castShadow = true;
+  room.add(standingLampPole);
 
   const lampShade = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.42, 0.55, 0.6, 18),
+    new THREE.CylinderGeometry(0.5, 0.7, 0.8, 18),
     new THREE.MeshStandardMaterial({ color: 0xfff7cf, roughness: 1 }),
   );
-  lampShade.position.set(-6.1, 2.35, 2.4);
+  lampShade.position.set(-13.8, 2.9, 4.8);
   lampShade.castShadow = true;
   room.add(lampShade);
 
-  const tv = createRoundedBox(1.9, 1.1, 0.1, 0x20253b);
-  tv.position.set(2.1, 2.05, 4.9);
-  room.add(tv);
+  const bigTv = createRoundedBox(3.2, 1.8, 0.12, 0x20253b);
+  bigTv.position.set(2.8, 2.95, 10.8);
+  room.add(bigTv);
 
-  const ownerDoor = new THREE.Group();
-  const door = createRoundedBox(1.6, 3.4, 0.18, 0xffab5f);
-  door.position.set(0, 1.7, 0);
-  ownerDoor.add(door);
-  ownerDoor.position.set(8.18, 0, -3.2);
-  ownerDoor.rotation.y = -Math.PI / 2;
-  room.add(ownerDoor);
+  const bowl = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.38, 0.5, 0.18, 20),
+    new THREE.MeshStandardMaterial({ color: 0x63c7ff, roughness: 0.95 }),
+  );
+  bowl.position.set(-4.8, 0.09, 7.4);
+  bowl.castShadow = true;
+  bowl.receiveShadow = true;
+  room.add(bowl);
 
   const roomBounds = {
-    minX: -8.2,
-    maxX: 8.2,
-    minZ: -8.2,
-    maxZ: 8.2,
+    minX: -17,
+    maxX: 17,
+    minZ: -17,
+    maxZ: 17,
     floorY: 0,
   };
 
@@ -234,7 +403,14 @@ export function createSceneWorld(canvas) {
     scene,
     camera,
     supports,
+    staticColliders,
+    walkableSurfaces,
     roomBounds,
     ownerDoor,
+    ownerPath: {
+      inside: new THREE.Vector3(15.7, 0, -2),
+      outside: new THREE.Vector3(20.7, 0, -2),
+    },
+    spawnPoint: new THREE.Vector3(-6.5, 0, 4.5),
   };
 }

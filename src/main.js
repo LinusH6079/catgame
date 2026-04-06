@@ -15,10 +15,13 @@ const ui = new UIManager();
 const gameState = new GameStateManager(90);
 const scoring = new ScoringSystem();
 const audio = new AudioManager();
-const player = new PlayerController(world.scene, world.roomBounds);
+const player = new PlayerController(world.scene, world.roomBounds, world.spawnPoint, {
+  staticColliders: world.staticColliders,
+  walkableSurfaces: world.walkableSurfaces,
+});
 const cameraController = new CameraController(world.camera);
 const interactables = new InteractableManager(world.scene, world.supports);
-const owner = new OwnerSystem(world.scene, world.ownerDoor.position.clone());
+const owner = new OwnerSystem(world.scene, world.ownerPath);
 const clock = new THREE.Clock();
 
 let ownerLine = "\"Miso...\"";
@@ -102,10 +105,14 @@ function maybeMeow() {
 
 function updatePlaying(deltaSeconds) {
   player.update(deltaSeconds);
-  cameraController.update(deltaSeconds, player);
   scoring.update(deltaSeconds);
   dramaticCooldown = Math.max(0, dramaticCooldown - deltaSeconds);
   ambienceTimer += deltaSeconds;
+
+  const contactStrength = interactables.resolvePlayerContact(player, deltaSeconds);
+  if (contactStrength > 1.5 && Math.random() < 0.18) {
+    audio.impact(Math.min(1, contactStrength * 0.08));
+  }
 
   const interactionData = player.getInteractionData();
   if (interactionData.isSwiping || interactionData.isDashing) {
@@ -119,13 +126,17 @@ function updatePlaying(deltaSeconds) {
     }
   }
 
+  cameraController.update(deltaSeconds, player);
+
   const chaosEvents = interactables.update(deltaSeconds);
   chaosEvents.forEach(applyChaosEvent);
 
   const ownerState = owner.update(deltaSeconds, player, scoring.score);
-  if (ownerState.stunned) {
+  if (ownerState.caught) {
+    scoring.penalize(450);
+    gameState.timeLeft = Math.max(0, gameState.timeLeft - 6);
     ownerLine = ownerState.text;
-    ui.toast("Caught!", { big: true });
+    ui.toast("Caught! -450 pts -6.0s", { big: true });
     audio.ownerAlert();
     cameraController.triggerShake(0.16);
     ui.shakeScreen();
@@ -147,7 +158,8 @@ function updatePlaying(deltaSeconds) {
     ownerText: ownerLine,
   });
 
-  if (ended) {
+  if (ended || gameState.timeLeft === 0) {
+    gameState.endRound();
     scoring.saveBestIfNeeded();
     ui.showEnd({
       score: scoring.score,

@@ -15,13 +15,13 @@ export class CameraController {
   }
 
   update(deltaSeconds, player) {
-    const followOffset = new THREE.Vector3(0, 2.45, 4.9);
+    const followOffset = new THREE.Vector3(0, 3.4, 7.4);
     const desired = player.position.clone().add(followOffset);
-    desired.x += player.forward.x * 0.9;
-    desired.z += player.forward.z * 0.9;
+    desired.x += player.forward.x * 1.1;
+    desired.z += player.forward.z * 1.1;
 
     this.target.lerp(desired, 1 - Math.exp(-deltaSeconds * 7));
-    this.lookAt.lerp(player.position.clone().add(new THREE.Vector3(0, 0.78, 0)), 1 - Math.exp(-deltaSeconds * 9));
+    this.lookAt.lerp(player.position.clone().add(new THREE.Vector3(0, 0.95, 0)), 1 - Math.exp(-deltaSeconds * 9));
 
     this.shakeTimer = Math.max(0, this.shakeTimer - deltaSeconds);
     const shakeAmount = this.shakeTimer > 0 ? this.shakeStrength * (this.shakeTimer / 0.16) : 0;
